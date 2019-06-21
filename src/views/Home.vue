@@ -66,7 +66,7 @@
             getData() {
                 if (this.request.length > 1) {
                     this.preloader = true;
-                    this.$http.get('/search/repositories?q=​' + this.request)
+                    this.$http.get('/search/repositories?q=' + this.request)
                         .then(response => {
                             return response.json();
                         }, response => {
