@@ -9,11 +9,15 @@ export default new Vuex.Store({
     state: {
         request: '',
         projects: [],
-        preloader: false
+        preloader: false,
+        wait: false
     },
     mutations: {
         updatePreloader(state) {
             state.preloader = !state.preloader;
+        },
+        updateWait(state) {
+            state.wait = !state.wait;
         },
         updateProjects(state, projects) {
             state.projects = projects;
@@ -23,23 +27,13 @@ export default new Vuex.Store({
         },
     },
     actions: {
-        // delay({ commit, dispatch }) {
-        //     let time = false;
-        //     let minimum = 1;
-        //     console.log('st' + time)
-        //         if (!time) {
-        //             dispatch('getData');
-        //             time = true;
-        //             console.log('end' + time)
-        //             setTimeout(function () {
-        //                 time = false;
-        //                 console.log('d' + time)
-        //             }, 10000);
-        //         }
-        // },
         getData(ctx) {
-            if (ctx.state.request.length > 1) {
+            if (ctx.state.request.length > 1 && !ctx.state.wait) {
                 ctx.commit('updatePreloader');
+                ctx.commit('updateWait');
+                setTimeout(function () {
+                    ctx.commit('updateWait');
+                }, 1000);
                 Vue.http.get('/search/repositories?q=vue')
                     .then(response => {
                         return response.json();
@@ -50,6 +44,8 @@ export default new Vuex.Store({
                         ctx.commit('updateProjects', projects);
                         ctx.commit('updatePreloader');
                     });
+            } else {
+                ctx.commit('updateProjects', []);
             }
         }
     },
