@@ -38,7 +38,8 @@ export default new Vuex.Store({
         //         }
         // },
         getData(ctx) {
-            ctx.commit('updatePreloader');
+            if (ctx.state.request.length > 1) {
+                ctx.commit('updatePreloader');
                 Vue.http.get('/search/repositories?q=vue')
                     .then(response => {
                         return response.json();
@@ -49,6 +50,7 @@ export default new Vuex.Store({
                         ctx.commit('updateProjects', projects);
                         ctx.commit('updatePreloader');
                     });
+            }
         }
     },
     getters: {
