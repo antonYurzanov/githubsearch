@@ -8,14 +8,14 @@
                     class="search__text"
                     placeholder="Search for projects on githab"
                     v-model="request"
-                    @input="delayGet"
+                    @input="getData"
             />
         </form>
         <div class="preloader" v-show="preloader">Идет загрузка данных...</div>
         <ul class="projects main__projects" v-show="!preloader">
             <li
                     class="projects__item"
-                    v-for="project in projects.items"
+                    v-for="project in allProjects.items"
             >
                 <span class="projects__icon"><i class="fab fa-github"></i></span> <a :href="project.html_url"
                                                                                      target="_blank"
@@ -30,57 +30,25 @@
 </template>
 
 <script>
+    import {mapGetters, mapActions, mapState} from 'vuex'
+
     export default {
-        data() {
-            return {
-                request: '',
-                preloader: false
-            }
-        },
         computed: {
-            delayGet: function () {
-                const DELAY = 1000;
-                return this.delay(this.getData, DELAY);
-            },
-            projects() {
-                return this.$store.state.projects;
+            ...mapState({
+                preloader: state => state.preloader
+            }),
+            ...mapGetters(['allProjects']),
+            request: {
+                get() {
+                    return this.$store.state.request
+                },
+                set(value) {
+                    this.$store.commit('updateRequest', value)
+                }
             }
         },
         methods: {
-            delay(callback, limit) {
-                let time = false;
-                let minimum = this.request.length;
-                return function () {
-                    if (!time) {
-                        callback.call();
-
-                        if (minimum < 1) {
-                            time = true;
-                        }
-                        setTimeout(function () {
-                            time = false;
-                        }, limit);
-                    }
-                }
-            },
-            getData() {
-                if (this.request.length > 1) {
-                    this.preloader = true;
-                    this.$http.get('/search/repositories?q=' + this.request)
-                        .then(response => {
-                            return response.json();
-                        }, response => {
-                            console.log(response);
-                        })
-                        .then(projects => {
-                            console.log(projects);
-                            this.$store.state.projects = projects;
-                            this.preloader = false;
-                        });
-                } else if (this.request.length < 1) {
-                    this.$store.state.projects = [];
-                }
-            }
+            ...mapActions(['getData', 'delay'])
         }
     }
 </script>
